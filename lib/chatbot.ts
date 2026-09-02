@@ -4,7 +4,16 @@ import { STATUS_LABEL } from "@/lib/workflow";
 import { isStaff } from "@/lib/roles";
 import { fmtDate } from "@/lib/format";
 
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
+// Primary model (overridable) plus fallbacks tried in order when one is
+// overloaded (503) or rate-limited (429). Keeps the assistant responsive when a
+// given model spikes in demand.
+const MODELS = [
+  process.env.GEMINI_MODEL,
+  "gemini-3.5-flash",
+  "gemini-flash-lite-latest",
+  "gemini-3.6-flash",
+  "gemini-3.8-flash",
+].filter(Boolean) as string[];
 
 export function chatConfigured(): boolean {
   return !!process.env.GEMINI_API_KEY;
@@ -107,24 +116,30 @@ export async function askGemini(role: Role, context: string, history: ChatTurn[]
     parts: [{ text: t.content.slice(0, 1500) }],
   }));
 
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: system }] },
-          contents,
-          generationConfig: { temperature: 0.4, maxOutputTokens: 500, topP: 0.9 },
-        }),
-      },
-    );
-    if (!res.ok) return "Sorry, I couldn't reach the assistant just now. Please try again in a moment.";
-    const data = await res.json();
-    const text = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text).join("") ?? "";
-    return text.trim() || "I'm not sure about that. For anything I can't answer, please contact the Examination Office.";
-  } catch {
-    return "Sorry, something went wrong reaching the assistant. Please try again.";
+  const payload = JSON.stringify({
+    system_instruction: { parts: [{ text: system }] },
+    contents,
+    generationConfig: { temperature: 0.4, maxOutputTokens: 800, topP: 0.9 },
+  });
+
+  for (const model of MODELS) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: payload },
+      );
+      if (res.status === 503 || res.status === 429) continue; // overloaded — try next model
+      if (!res.ok) continue;
+      const data = await res.json();
+      const text = (data?.candidates?.[0]?.content?.parts ?? [])
+        .map((p: { text?: string }) => p.text ?? "")
+        .join("")
+        .trim();
+      if (text) return text;
+      // empty (e.g. token budget spent on reasoning) — try the next model
+    } catch {
+      // network error — try the next model
+    }
   }
+  return "Sorry, the assistant is busy right now. Please try again in a moment, or contact the Examination Office at +91 20 3910 0234.";
 }

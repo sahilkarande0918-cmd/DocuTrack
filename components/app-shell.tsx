@@ -123,7 +123,7 @@ export function AppShell({
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
       </div>
 
-      <ChatWidget role={role} />
+      <ChatWidget role={role} name={user.name} />
     </div>
   );
 }

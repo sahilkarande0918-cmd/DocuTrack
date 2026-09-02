@@ -10,11 +10,12 @@ import { cn } from "@/lib/cn";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-export function ChatWidget({ role }: { role: Role }) {
+export function ChatWidget({ role, name }: { role: Role; name: string }) {
   const staff = isStaff(role);
+  const firstName = name.trim().split(" ")[0] || (staff ? "there" : "there");
   const greeting = staff
-    ? "Hi! I'm Ask Help. Ask me about any student's request status, where a document is, who's handling it, workload, or institute contacts."
-    : "Hi! I'm Ask Help. I can tell you the status of your document requests, how the process works, or who to contact. What do you need?";
+    ? `Hi ${firstName}! I'm Ask Help. Ask me about any student's request status, where a document is, who's handling it, workload, or institute contacts.`
+    : `Hi ${firstName}! I'm Ask Help. I can tell you the status of your document requests, how the process works, or who to contact. What do you need?`;
   const placeholder = staff ? "Ask about a student or request…" : "Ask about your documents…";
 
   const [open, setOpen] = useState(false);
