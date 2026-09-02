@@ -5,9 +5,10 @@ import { revalidatePath } from "next/cache";
 import type { EventType, NotificationType, RequestStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireStudent, requireStaff } from "@/lib/session";
-import { canApprove, canProcess } from "@/lib/roles";
+import { canApprove, canProcess, isStaff } from "@/lib/roles";
 import { canTransition } from "@/lib/workflow";
 import { newRequestSchema, MAX_FILE_BYTES, ACCEPTED_TYPES } from "@/lib/validation";
+import { sendEmail, EMAIL_TEMPLATES, appUrl } from "@/lib/email";
 
 export type ActionResult = { error?: string; ok?: boolean };
 
@@ -87,6 +88,24 @@ async function notify(args: {
   type: NotificationType;
 }) {
   await prisma.notification.create({ data: { ...args } });
+
+  // Also send a real email to the recipient's institute address (no-op if
+  // EmailJS isn't configured). Fire-and-forget — never blocks the workflow.
+  const template = EMAIL_TEMPLATES.notification();
+  if (!template) return;
+  const recipient = await prisma.user.findUnique({
+    where: { id: args.recipientId },
+    select: { email: true, fullName: true, role: true },
+  });
+  if (!recipient) return;
+  const area = isStaff(recipient.role) ? "faculty" : "student";
+  await sendEmail(template, {
+    to_email: recipient.email,
+    to_name: recipient.fullName,
+    title: args.title,
+    message: args.message,
+    link: `${appUrl()}/${area}/requests/${args.requestId}`,
+  });
 }
 
 function refreshStudent(id: string) {

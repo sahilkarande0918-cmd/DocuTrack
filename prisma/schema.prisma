@@ -78,8 +78,21 @@ model User {
   uploadedFiles RequestFile[]
   events        RequestEvent[]
   notifications Notification[]
+  resetTokens   PasswordResetToken[]
 
   @@index([role])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 model DocumentType {

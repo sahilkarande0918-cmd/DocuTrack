@@ -7,6 +7,8 @@ import { signIn, signOut } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { signupSchema } from "@/lib/validation";
 import { isInstituteEmail, domainHint } from "@/lib/domain";
+import { sendEmail, EMAIL_TEMPLATES, appUrl } from "@/lib/email";
+import { createResetToken, findValidToken } from "@/lib/reset";
 
 export type FormState = {
   error?: string;
@@ -140,6 +142,46 @@ export async function resetPasswordAction(_prev: FormState, formData: FormData):
 
   const passwordHash = await bcrypt.hash(password, 10);
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+  return { ok: true };
+}
+
+/**
+ * Email-link reset — step 1. Emails a one-time link. Always returns a generic
+ * success so account existence isn't revealed.
+ */
+export async function requestPasswordReset(_prev: FormState, formData: FormData): Promise<FormState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!email) return { fieldErrors: { email: "Enter your email" } };
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (user) {
+    const raw = await createResetToken(user.id);
+    await sendEmail(EMAIL_TEMPLATES.reset(), {
+      to_email: user.email,
+      to_name: user.fullName,
+      reset_link: `${appUrl()}/reset-password?token=${raw}`,
+    });
+  }
+  return { ok: true };
+}
+
+/** Email-link reset — step 2. Consumes a valid token and sets the new password. */
+export async function completePasswordReset(_prev: FormState, formData: FormData): Promise<FormState> {
+  const token = String(formData.get("token") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+
+  if (password.length < 8) return { fieldErrors: { password: "Use at least 8 characters" } };
+  if (password !== confirm) return { fieldErrors: { confirm: "Passwords do not match" } };
+
+  const row = await findValidToken(token);
+  if (!row) return { error: "This reset link is invalid or has expired. Please request a new one." };
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  await prisma.$transaction([
+    prisma.user.update({ where: { id: row.userId }, data: { passwordHash } }),
+    prisma.passwordResetToken.update({ where: { id: row.id }, data: { usedAt: new Date() } }),
+  ]);
   return { ok: true };
 }
 
