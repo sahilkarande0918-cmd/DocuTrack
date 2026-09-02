@@ -1,0 +1,171 @@
+// DocuTrack — MITAOE Document Request & Tracking Portal
+// Postgres (Neon). Files are stored as bytea and served via an auth-guarded route.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  STUDENT
+  FACULTY
+  APPROVER
+  OFFICE_STAFF
+  ADMIN
+}
+
+enum RequestStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  CORRECTION_REQUIRED
+  CORRECTION_SUBMITTED
+  APPROVED
+  REJECTED
+  PROCESSING
+  READY
+  COMPLETED
+}
+
+enum FileCategory {
+  SUPPORTING
+  COMPLETED
+}
+
+enum EventType {
+  SUBMITTED
+  DOCS_RECEIVED
+  STATUS_CHANGE
+  CORRECTION_REQUESTED
+  CORRECTION_SUBMITTED
+  APPROVED
+  REJECTED
+  PROCESSING
+  DOCUMENT_UPLOADED
+  READY
+  COMPLETED
+  REMARK
+}
+
+enum NotificationType {
+  INFO
+  ACTION
+  SUCCESS
+  WARNING
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  role         Role     @default(STUDENT)
+  studentId    String?
+  department   String?
+  year         String?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  requests      DocumentRequest[] @relation("StudentRequests")
+  assigned      DocumentRequest[] @relation("AssignedRequests")
+  approved      DocumentRequest[] @relation("ApprovedRequests")
+  uploadedFiles RequestFile[]
+  events        RequestEvent[]
+  notifications Notification[]
+
+  @@index([role])
+}
+
+model DocumentType {
+  id           String            @id @default(cuid())
+  slug         String            @unique
+  name         String
+  description  String
+  active       Boolean           @default(true)
+  requirements Json // { info: string[], files: {key,label}[] }
+  createdAt    DateTime          @default(now())
+  requests     DocumentRequest[]
+}
+
+model DocumentRequest {
+  id             String        @id @default(cuid())
+  requestNumber  String        @unique
+  student        User          @relation("StudentRequests", fields: [studentId], references: [id], onDelete: Cascade)
+  studentId      String
+  documentType   DocumentType  @relation(fields: [documentTypeId], references: [id])
+  documentTypeId String
+  purpose        String
+  academicYear   String
+  status         RequestStatus @default(SUBMITTED)
+  assignedTo     User?         @relation("AssignedRequests", fields: [assignedToId], references: [id])
+  assignedToId   String?
+  approvedBy     User?         @relation("ApprovedRequests", fields: [approvedById], references: [id])
+  approvedById   String?
+  approvedAt     DateTime?
+  completedAt    DateTime?
+  rejectionReason String?
+  currentRemarks String?
+  submittedAt    DateTime      @default(now())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  files  RequestFile[]
+  events RequestEvent[]
+
+  @@index([studentId])
+  @@index([status])
+  @@index([documentTypeId])
+  @@index([submittedAt])
+}
+
+model RequestFile {
+  id           String          @id @default(cuid())
+  request      DocumentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestId    String
+  uploadedBy   User            @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+  fileName     String
+  contentType  String
+  size         Int
+  category     FileCategory    @default(SUPPORTING)
+  requirementKey String? // maps to a document type's required file key
+  data         Bytes
+  createdAt    DateTime        @default(now())
+
+  @@index([requestId])
+}
+
+model RequestEvent {
+  id             String          @id @default(cuid())
+  request        DocumentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestId      String
+  actor          User?           @relation(fields: [actorId], references: [id])
+  actorId        String?
+  eventType      EventType
+  previousStatus RequestStatus?
+  newStatus      RequestStatus?
+  remarks        String?
+  createdAt      DateTime        @default(now())
+
+  @@index([requestId])
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  recipient   User             @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  recipientId String
+  requestId   String?
+  title       String
+  message     String
+  type        NotificationType @default(INFO)
+  read        Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  @@index([recipientId, read])
+}
