@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-const PASSWORD = "Password123";
+const PASSWORD = "password123";
 
 function samplePdf(label: string): Uint8Array<ArrayBuffer> {
   // A minimal valid-ish PDF byte stream — enough to download and open as a sample.

@@ -74,7 +74,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Demo accounts
 
-All demo accounts use the password **`Password123`**.
+All demo accounts use the password **`password123`**.
 
 | Portal | Role | Email |
 | --- | --- | --- |

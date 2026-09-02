@@ -121,7 +121,7 @@ export function LoginForm({ initialPortal }: { initialPortal: Portal }) {
                 <code className="tnum text-faint">{d.email}</code>
               </li>
             ))}
-            <li className="pt-1 text-faint">Password for all demo accounts: <code>Password123</code></li>
+            <li className="pt-1 text-faint">Password for all demo accounts: <code>password123</code></li>
           </ul>
         )}
       </div>
