@@ -49,6 +49,7 @@ async function main() {
     mkUser("hod.comp@mitaoe.ac.in", "Dr. S. R. Kulkarni", "APPROVER", { department: "Computer Engineering" }),
     mkUser("prof@mitaoe.ac.in", "Prof. A. B. Pawar", "FACULTY", { department: "Computer Engineering" }),
     mkUser("admin@mitaoe.ac.in", "System Administrator", "ADMIN", { department: "IT Services" }),
+    mkUser("sahilkarande0918@gmail.com", "Sahil Karande", "ADMIN", { department: "IT Services" }),
   ]);
 
   // --- Document types ---
