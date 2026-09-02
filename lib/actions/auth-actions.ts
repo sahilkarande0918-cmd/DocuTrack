@@ -15,7 +15,9 @@ export type FormState = {
 };
 
 const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().email("Enter a valid email"),
+  // Any identifier for staff; the institute-domain rule below applies to
+  // students only, so we only require a non-empty value at this layer.
+  email: z.string().trim().toLowerCase().min(1, "Enter your email"),
   password: z.string().min(1, "Enter your password"),
   portal: z.enum(["student", "staff"]),
 });

@@ -8,7 +8,9 @@ import { portalOf } from "@/lib/roles";
 import { isInstituteEmail } from "@/lib/domain";
 
 const credsSchema = z.object({
-  email: z.string().email(),
+  // Staff may use any email/username; students are checked for the institute
+  // domain below, so only a non-empty identifier is required here.
+  email: z.string().min(1),
   password: z.string().min(1),
   portal: z.enum(["student", "staff"]),
 });

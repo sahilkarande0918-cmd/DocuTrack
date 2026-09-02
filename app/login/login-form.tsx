@@ -69,11 +69,11 @@ export function LoginForm({ initialPortal }: { initialPortal: Portal }) {
       <form action={action} className="mt-4 space-y-4">
         <input type="hidden" name="portal" value={portal} />
         <Field
-          label="Email address"
+          label={portal === "student" ? "Email address" : "Email or username"}
           name="email"
-          type="email"
+          type={portal === "student" ? "email" : "text"}
           autoComplete="username"
-          placeholder={portal === "student" ? "you@mitaoe.ac.in" : "you@mitaoe.ac.in"}
+          placeholder={portal === "student" ? "you@mitaoe.ac.in" : "you@example.com"}
           error={state.fieldErrors?.email}
           required
         />
