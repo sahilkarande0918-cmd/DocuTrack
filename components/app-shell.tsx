@@ -9,6 +9,7 @@ import type { Role } from "@prisma/client";
 import { studentNav, facultyNav, type NavSection } from "@/lib/nav";
 import { logoutAction } from "@/lib/actions/auth-actions";
 import { Brandmark } from "@/components/brand";
+import { ChatWidget } from "@/components/chat-widget";
 import { cn } from "@/lib/cn";
 
 type ShellUser = { name: string; email: string; roleLabel: string; initials: string };
@@ -121,6 +122,8 @@ export function AppShell({
 
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
       </div>
+
+      <ChatWidget role={role} />
     </div>
   );
 }
