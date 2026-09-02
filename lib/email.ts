@@ -42,6 +42,9 @@ export function appUrl(): string {
 export async function sendEmail(templateId: string, params: Record<string, string>): Promise<boolean> {
   const c = cfg();
   if (!c || !templateId) return false;
+  // Provide `email` as an alias of `to_email` so the template's "To Email"
+  // field works whether it references {{to_email}} or the default {{email}}.
+  const template_params = { email: params.to_email, ...params };
   try {
     const res = await fetch(ENDPOINT, {
       method: "POST",
@@ -51,7 +54,7 @@ export async function sendEmail(templateId: string, params: Record<string, strin
         template_id: templateId,
         user_id: c.publicKey,
         accessToken: c.privateKey,
-        template_params: params,
+        template_params,
       }),
     });
     return res.ok;
