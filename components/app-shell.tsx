@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X, PanelLeftClose, PanelLeftOpen, LogOut } from "lucide-react";
-import type { NavSection } from "@/lib/nav";
+import type { Role } from "@prisma/client";
+import { studentNav, facultyNav, type NavSection } from "@/lib/nav";
 import { logoutAction } from "@/lib/actions/auth-actions";
 import { Brandmark } from "@/components/brand";
 import { cn } from "@/lib/cn";
@@ -13,16 +14,17 @@ import { cn } from "@/lib/cn";
 type ShellUser = { name: string; email: string; roleLabel: string; initials: string };
 
 export function AppShell({
-  sections,
+  role,
   user,
   badges,
   children,
 }: {
-  sections: NavSection[];
+  role: Role;
   user: ShellUser;
   badges: Record<string, number>;
   children: React.ReactNode;
 }) {
+  const sections: NavSection[] = role === "STUDENT" ? studentNav() : facultyNav(role);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -142,11 +144,9 @@ function SidebarBody({
     <>
       <div className={cn("flex items-center gap-2 px-3 pt-4 pb-3", collapsed ? "justify-center" : "justify-between")}>
         {!collapsed ? (
-          <Brandmark tone="dark" />
+          <Brandmark tone="dark" showTagline={false} />
         ) : (
-          <span className="flex size-9 items-center justify-center rounded-md bg-accent text-sm font-semibold text-accent-ink">
-            MA
-          </span>
+          <span className="text-base font-extrabold tracking-tight text-white">MIT</span>
         )}
         {onToggle && (
           <button

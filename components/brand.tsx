@@ -1,9 +1,10 @@
 import { cn } from "@/lib/cn";
 
 /**
- * Institutional identity. Uses a neutral typographic monogram — NOT a redrawn
- * or fabricated MITAOE emblem, and not the MIT (Cambridge) logo. To use the
- * official mark, drop `public/mitaoe-logo.png` in and swap the monogram tile.
+ * MITAOE institutional wordmark, recreated as a crisp, theme-aware vector-style
+ * mark: heavy "MIT", a thin rule, then "Academy of Engineering".
+ * To use the official raster instead, drop `public/mitaoe-logo.png` in and render
+ * it here with next/image.
  */
 export function Brandmark({
   tone = "light",
@@ -14,19 +15,20 @@ export function Brandmark({
   showTagline?: boolean;
   className?: string;
 }) {
-  const nameColor = tone === "dark" ? "text-sidebar-ink" : "text-ink";
+  const mitColor = tone === "dark" ? "text-white" : "text-brand";
+  const nameColor = tone === "dark" ? "text-sidebar-ink" : "text-brand";
+  const ruleColor = tone === "dark" ? "bg-white/30" : "bg-brand/25";
   const subColor = tone === "dark" ? "text-sidebar-muted" : "text-muted";
+
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
-      <span
-        aria-hidden
-        className="flex size-9 shrink-0 items-center justify-center rounded-md bg-accent font-semibold tracking-tight text-accent-ink"
-      >
-        MA
-      </span>
+      <span className={cn("text-[22px] font-extrabold leading-none tracking-tight", mitColor)}>MIT</span>
+      <span className={cn("h-8 w-px shrink-0", ruleColor)} aria-hidden />
       <div className="min-w-0 leading-tight">
-        <div className={cn("truncate text-sm font-semibold", nameColor)}>MIT Academy of Engineering</div>
-        {showTagline && <div className={cn("truncate text-xs", subColor)}>Alandi, Pune</div>}
+        <div className={cn("text-[13px] font-semibold", nameColor)}>Academy of Engineering</div>
+        <div className={cn("truncate text-[11px]", subColor)}>
+          {showTagline ? "Autonomous Institute · SPPU, Pune" : "DocuTrack"}
+        </div>
       </div>
     </div>
   );

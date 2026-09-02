@@ -1,6 +1,5 @@
 import { requireStudent } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { studentNav } from "@/lib/nav";
 import { ROLE_LABEL } from "@/lib/roles";
 import { initials } from "@/lib/format";
 import { AppShell } from "@/components/app-shell";
@@ -13,7 +12,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <AppShell
-      sections={studentNav()}
+      role={user.role}
       user={{
         name: user.name ?? "Student",
         email: user.email ?? "",

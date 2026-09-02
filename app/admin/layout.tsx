@@ -1,6 +1,5 @@
 import { requireAdmin } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { facultyNav } from "@/lib/nav";
 import { ROLE_LABEL } from "@/lib/roles";
 import { initials } from "@/lib/format";
 import { AppShell } from "@/components/app-shell";
@@ -16,7 +15,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <AppShell
-      sections={facultyNav(user.role)}
+      role={user.role}
       user={{
         name: user.name ?? "Admin",
         email: user.email ?? "",

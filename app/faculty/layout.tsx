@@ -1,6 +1,5 @@
 import { requireStaff } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { facultyNav } from "@/lib/nav";
 import { ROLE_LABEL } from "@/lib/roles";
 import { initials } from "@/lib/format";
 import { AppShell } from "@/components/app-shell";
@@ -17,7 +16,7 @@ export default async function FacultyLayout({ children }: { children: React.Reac
 
   return (
     <AppShell
-      sections={facultyNav(user.role)}
+      role={user.role}
       user={{
         name: user.name ?? "Staff",
         email: user.email ?? "",
