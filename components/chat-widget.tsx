@@ -14,8 +14,8 @@ export function ChatWidget({ role, name }: { role: Role; name: string }) {
   const staff = isStaff(role);
   const firstName = name.trim().split(" ")[0] || (staff ? "there" : "there");
   const greeting = staff
-    ? `Hi ${firstName}! I'm Ask Help. Ask me about any student's request status, where a document is, who's handling it, workload, or institute contacts.`
-    : `Hi ${firstName}! I'm Ask Help. I can tell you the status of your document requests, how the process works, or who to contact. What do you need?`;
+    ? `Hi ${firstName}! I'm Emilia. Ask me about any student's request status, where a document is, who's handling it, workload, or institute contacts.`
+    : `Hi ${firstName}! I'm Emilia. I can tell you the status of your document requests, how the process works, or who to contact. What do you need?`;
   const placeholder = staff ? "Ask about a student or request…" : "Ask about your documents…";
 
   const [open, setOpen] = useState(false);
@@ -75,7 +75,7 @@ export function ChatWidget({ role, name }: { role: Role; name: string }) {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 text-sm font-semibold">
                   <MessageCircle className="size-4" aria-hidden />
-                  Ask Help
+                  Emilia
                 </div>
                 <div className="text-[11px] text-white/60">{staff ? "Staff assistant" : "Student assistant"}</div>
               </div>
@@ -151,7 +151,7 @@ export function ChatWidget({ role, name }: { role: Role; name: string }) {
       {/* floating robot button */}
       <motion.button
         onClick={() => setOpen((o) => !o)}
-        aria-label={open ? "Close Ask Help" : "Open Ask Help"}
+        aria-label={open ? "Close Emilia" : "Open Emilia"}
         className="relative flex size-14 items-center justify-center rounded-full bg-accent text-white shadow-[var(--shadow-pop)] ring-1 ring-black/5 hover:bg-accent-hover"
         animate={reduce || open ? {} : { y: [0, -5, 0] }}
         transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}

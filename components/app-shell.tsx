@@ -145,22 +145,31 @@ function SidebarBody({
 }) {
   return (
     <>
-      <div className={cn("flex items-center gap-2 px-3 pt-4 pb-3", collapsed ? "justify-center" : "justify-between")}>
-        {!collapsed ? (
-          <Brandmark tone="dark" showTagline={false} />
-        ) : (
-          <span className="text-base font-extrabold tracking-tight text-white">MIT</span>
-        )}
-        {onToggle && (
+      <div className={cn("flex flex-col px-3 pt-4 pb-3", collapsed ? "items-center gap-2" : "gap-0")}>
+        <div className={cn("flex w-full items-center", collapsed ? "justify-center" : "justify-between gap-2")}>
+          {!collapsed ? (
+            <Brandmark tone="dark" showTagline={false} />
+          ) : (
+            <span className="text-base font-extrabold tracking-tight text-white">MIT</span>
+          )}
+          {onToggle && !collapsed && (
+            <button
+              onClick={onToggle}
+              className="hidden size-8 shrink-0 items-center justify-center rounded-md text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-ink lg:flex"
+              aria-label="Collapse sidebar"
+            >
+              <PanelLeftClose className="size-4" />
+            </button>
+          )}
+        </div>
+        {onToggle && collapsed && (
           <button
             onClick={onToggle}
-            className={cn(
-              "hidden size-8 items-center justify-center rounded-md text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-ink lg:flex",
-              collapsed && "absolute left-1/2 top-14 -translate-x-1/2",
-            )}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="hidden size-8 items-center justify-center rounded-md text-sidebar-muted ring-1 ring-sidebar-hover hover:bg-sidebar-hover hover:text-white lg:flex"
+            aria-label="Expand sidebar"
+            title="Expand sidebar"
           >
-            {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
+            <PanelLeftOpen className="size-4" />
           </button>
         )}
       </div>

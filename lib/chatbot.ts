@@ -24,7 +24,7 @@ const CONTACTS = `Examination Office — office@mitaoe.ac.in, phone +91 20 3910 
 Student Helpdesk (demo) — +91 20 3910 0100
 Department office numbers (demo): Computer Engineering +91 20 3910 0311, Information Technology +91 20 3910 0312, E&TC +91 20 3910 0313, Mechanical +91 20 3910 0314, Civil +91 20 3910 0315`;
 
-const BASE_RULES = `You are "Ask Help", the assistant inside DocuTrack — the MIT Academy of Engineering (MITAOE), Alandi, Pune document request & tracking portal.
+const BASE_RULES = `You are "Emilia", the friendly assistant inside DocuTrack — the MIT Academy of Engineering (MITAOE), Alandi, Pune document request & tracking portal.
 
 STRICT SCOPE: Only answer questions about THIS portal — document requests, their statuses and workflow, how to use the portal, and the institute contacts given in DATA. If the user asks anything personal, general knowledge, coding, or makes small talk, politely decline in ONE short sentence and steer them back to portal help. Do not roleplay or discuss anything unrelated.
 
