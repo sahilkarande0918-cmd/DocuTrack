@@ -86,6 +86,11 @@ export function LoginForm({ initialPortal }: { initialPortal: Portal }) {
           error={state.fieldErrors?.password}
           required
         />
+        <div className="-mt-1 text-right">
+          <a href="/forgot-password" className="text-sm font-medium text-accent hover:underline">
+            Forgot password?
+          </a>
+        </div>
         <Button type="submit" className="w-full" disabled={pending}>
           {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
           {pending ? "Signing in…" : "Sign in"}

@@ -106,6 +106,43 @@ export async function signupAction(_prev: FormState, formData: FormData): Promis
   }
 }
 
+const resetSchema = z
+  .object({
+    email: z.string().trim().toLowerCase().min(1, "Enter your email"),
+    password: z.string().min(8, "Use at least 8 characters").max(72),
+    confirm: z.string().min(1, "Confirm your new password"),
+  })
+  .refine((d) => d.password === d.confirm, {
+    message: "Passwords do not match",
+    path: ["confirm"],
+  });
+
+/**
+ * Self-service password reset. No email service is configured on the free tier,
+ * so the user proves the account by email and sets a new password directly.
+ * Works for both student and staff accounts.
+ */
+export async function resetPasswordAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = resetSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+    confirm: formData.get("confirm"),
+  });
+  if (!parsed.success) {
+    return { fieldErrors: fieldErrorsOf(parsed.error) };
+  }
+  const { email, password } = parsed.data;
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    return { fieldErrors: { email: "No account found with that email." } };
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+  return { ok: true };
+}
+
 export async function logoutAction() {
   await signOut({ redirectTo: "/login" });
 }
